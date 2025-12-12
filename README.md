@@ -25,15 +25,25 @@ This project implements a robust focus stacking pipeline that fuses multiple ima
     *   Go to **File** -> **Open Folder...**
     *   Select the project root folder.
 
-3.  **Set Up Virtual Environment**
-    Open a terminal in VS Code (Ctrl+`) and run:
-    ```bash
-    python -m venv .venv
-    ```
+3.  **Run Setup Script**
+    We provide automated scripts to set up the virtual environment, install dependencies, and download necessary data.
+
+    *   **Windows (PowerShell)**:
+        ```powershell
+        .\setup.ps1
+        ```
+        *Note: If you encounter a security error, try running: `PowerShell -ExecutionPolicy Bypass -File .\setup.ps1`*
+
+    *   **macOS / Linux / Git Bash**:
+        ```bash
+        bash setup.sh
+        ```
 
 4.  **Activate Virtual Environment**
+    After setup is complete, activate the environment to run the application.
+
     *   **Windows**:
-        ```bash
+        ```powershell
         .venv\Scripts\activate
         ```
     *   **macOS/Linux**:
@@ -41,27 +51,24 @@ This project implements a robust focus stacking pipeline that fuses multiple ima
         source .venv/bin/activate
         ```
 
-5.  **Install Dependencies**
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-6.  **Initialize Project (Download Data & Precompute Cache)**
-    Run the initialization script to download the dataset and generate alignment caches. This ensures the GUI runs smoothly immediately.
-    ```bash
-    python initialize.py
-    ```
-
 ## Usage
 
 ### Running the GUI
 
-To start the application, run `gui.py`:
+To start the application, navigate to the `core` directory and run `gui.py`:
 
 ```bash
+cd core
 python gui.py
 ```
-The Graphical User Interface provides the easiest way to use the tool:
+
+### Running the GUI
+The Graphical User Interface provides the easiest way to use the tool.
+
+```bash
+cd core
+python gui.py
+```
 *   Select an image set from the dropdown.
 *   Choose your preferred mask type and pyramid levels.
 *   Click **Generate Fused Image**.
