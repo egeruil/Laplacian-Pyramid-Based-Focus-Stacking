@@ -56,20 +56,12 @@ This project implements a robust focus stacking pipeline that fuses multiple ima
 
 ### Running the GUI
 
-To start the application, navigate to the `core` directory and run `gui.py`:
+To start the application, run `gui.py`:
 
 ```bash
-cd core
 python gui.py
 ```
-
-### Running the GUI
-The Graphical User Interface provides the easiest way to use the tool.
-
-```bash
-cd core
-python gui.py
-```
+The Graphical User Interface provides the easiest way to use the tool:
 *   Select an image set from the dropdown.
 *   Choose your preferred mask type and pyramid levels.
 *   Click **Generate Fused Image**.
