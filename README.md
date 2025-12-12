@@ -44,7 +44,7 @@ This project implements a robust focus stacking pipeline that fuses multiple ima
 
     *   **Windows**:
         ```powershell
-        .venv\Scripts\activate
+        .venv\Scripts\Activate.ps1
         ```
     *   **macOS/Linux**:
         ```bash
