@@ -16,7 +16,7 @@ class FocusStackingGUI:
     def __init__(self, root):
         self.root = root
         self.root.title("Focus Stacking GUI")
-        self.root.geometry("600x750")
+        self.root.geometry("850x1000")
 
         # Use absolute paths based on the script location to ensure folders are found
         base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -28,6 +28,7 @@ class FocusStackingGUI:
         self.anim_frames = []
         self.anim_id = None
         self.anim_idx = 0
+        self.is_playing = True
 
         self.create_widgets()
 
@@ -90,13 +91,57 @@ class FocusStackingGUI:
         self.display_frame = ttk.Frame(self.root)
         self.display_frame.pack(expand=True, fill="both", padx=10, pady=10)
         
-        # Left: Animation
-        self.anim_label = ttk.Label(self.display_frame, text="Source Images", anchor="center")
-        self.anim_label.pack(side="left", expand=True, fill="both", padx=5)
+        # Configure grid layout
+        self.display_frame.columnconfigure(0, weight=1)
+        self.display_frame.columnconfigure(1, weight=1)
+        self.display_frame.rowconfigure(1, weight=1)
+
+        # Titles
+        self.lbl_source_title = ttk.Label(self.display_frame, text="Source Images", font=("Arial", 12))
+        self.lbl_source_title.grid(row=0, column=0, pady=5)
+
+        self.lbl_result_title = ttk.Label(self.display_frame, text="Fused Result", font=("Arial", 12))
+        self.lbl_result_title.grid(row=0, column=1, pady=5)
+
+        # Images
+        self.anim_label = ttk.Label(self.display_frame, text="", anchor="center")
+        self.anim_label.grid(row=1, column=0, sticky="nsew", padx=5)
         
-        # Right: Result
-        self.result_label = ttk.Label(self.display_frame, text="Fused Result", anchor="center")
-        self.result_label.pack(side="right", expand=True, fill="both", padx=5)
+        self.result_label = ttk.Label(self.display_frame, text="", anchor="center")
+        self.result_label.grid(row=1, column=1, sticky="nsew", padx=5)
+        
+        # Controls (Left side)
+        self.controls_frame = ttk.Frame(self.display_frame)
+        self.controls_frame.grid(row=2, column=0, sticky="ew", pady=5, padx=5)
+        
+        self.btn_play = ttk.Button(self.controls_frame, text="Pause", command=self.toggle_play)
+        self.btn_play.pack(side="left", padx=5)
+        
+        self.anim_slider_var = tk.IntVar()
+        self.anim_slider = ttk.Scale(self.controls_frame, from_=0, to=0, variable=self.anim_slider_var, orient="horizontal", command=self.on_slider_change)
+        self.anim_slider.pack(side="left", fill="x", expand=True, padx=5)
+
+    def toggle_play(self):
+        self.is_playing = not self.is_playing
+        if self.is_playing:
+            self.btn_play.config(text="Pause")
+            if self.anim_id:
+                self.root.after_cancel(self.anim_id)
+                self.anim_id = None
+            self.animate_loop()
+        else:
+            self.btn_play.config(text="Play")
+            if self.anim_id:
+                self.root.after_cancel(self.anim_id)
+                self.anim_id = None
+
+    def on_slider_change(self, value):
+        if not self.anim_frames:
+            return
+        idx = int(float(value))
+        self.anim_idx = idx
+        img = self.anim_frames[self.anim_idx]
+        self.anim_label.config(image=img, text="")
 
     def refresh_folders(self):
         if os.path.exists(self.data_dir):
@@ -176,8 +221,8 @@ class FocusStackingGUI:
         
         # Resize to fit half window width roughly
         h, w = img.shape[:2]
-        max_h = 350
-        max_w = 280
+        max_h = 450
+        max_w = 425
         
         scale = min(max_h / h, max_w / w)
         new_w = int(w * scale)
@@ -198,6 +243,12 @@ class FocusStackingGUI:
             frame_resized = cv2.resize(frame, (new_w, new_h)) # Match size
             self.anim_frames.append(ImageTk.PhotoImage(Image.fromarray(frame_resized)))
             
+        # Initialize controls
+        self.anim_slider.config(to=len(self.anim_frames)-1)
+        self.anim_slider_var.set(0)
+        self.is_playing = True
+        self.btn_play.config(text="Pause")
+            
         self.start_animation()
 
     def start_animation(self):
@@ -208,20 +259,22 @@ class FocusStackingGUI:
         if not self.anim_frames:
             return
         
-        img = self.anim_frames[self.anim_idx]
-        self.anim_label.config(image=img, text="")
-        self.anim_idx = (self.anim_idx + 1) % len(self.anim_frames)
-        
-        # Loop at 10 FPS (100ms)
-        self.anim_id = self.root.after(100, self.animate_loop)
+        if self.is_playing:
+            img = self.anim_frames[self.anim_idx]
+            self.anim_label.config(image=img, text="")
+            self.anim_slider_var.set(self.anim_idx)
+            self.anim_idx = (self.anim_idx + 1) % len(self.anim_frames)
+            
+            # Loop at 10 FPS (100ms)
+            self.anim_id = self.root.after(100, self.animate_loop)
         
     def stop_animation(self):
         if self.anim_id:
             self.root.after_cancel(self.anim_id)
             self.anim_id = None
         self.anim_frames = []
-        self.anim_label.config(image="", text="Source Images")
-        self.result_label.config(image="", text="Fused Result")
+        self.anim_label.config(image="")
+        self.result_label.config(image="")
 
 if __name__ == "__main__":
     root = tk.Tk()
